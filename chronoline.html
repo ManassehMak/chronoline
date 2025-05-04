@@ -59,6 +59,7 @@
             position: relative;
             border-radius: 5px;
             transform: rotateX(15deg);
+            width: 200vw;
         }
 
         .graduation {
@@ -69,6 +70,7 @@
             align-items: center;
             transition: all 0.3s ease;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            bottom: 0;
         }
 
         .graduation-label {
@@ -95,20 +97,57 @@
             cursor: pointer;
             transform-style: preserve-3d;
             z-index: 2;
+            transform-origin: center;
         }
 
-        .event-shape {
-            width: 20px;
-            height: 20px;
+        .event-ball {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .event-diamond {
+            width: 15px;
+            height: 15px;
             position: absolute;
             transform: translate(-50%, -50%) rotate(45deg);
-            background: #009688;
-            box-shadow: 0 0 15px rgba(0,150,136,0.5);
             transition: all 0.3s ease;
+            box-shadow: 0 0 10px currentColor;
         }
 
         .event-info {
-            /* Стили остаются прежними */
+            position: absolute;
+            background: #E8F5E9;
+            padding: 10px;
+            border-radius: 5px;
+            color: #000080;
+            font-size: 14px;
+            white-space: nowrap;
+            transform: translateY(-100%) scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .event-marker:hover .event-info {
+            opacity: 1;
+            transform: translateY(-120%) scale(1);
+        }
+
+        .event-range {
+            position: absolute;
+            height: 10px;
+            background: rgba(33, 150, 243, 0.3);
+            border-radius: 5px;
+            transform: translateY(-50%);
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -123,11 +162,47 @@
     <script>
         const eventsData = {
             events: [
-                // 30 событий разных типов и важности
-                {id:1, title:"Война за испанское наследство", start:"1701-07-09", end:"1714-09-07", type:"range", importance:"century"},
-                {id:2, title:"Промышленная революция", start:"1760-01-01", end:"1840-01-01", type:"range", importance:"century"},
-                {id:3, title:"Открытие ДНК", date:"1953-02-28", type:"single", importance:"decade"},
-                // ... добавьте остальные 27 событий по аналогии
+                // Важные исторические события
+                {id:1, title:"Война за испанское наследство", start:"1701-07-09", end:"1714-09-07", type:"range", importance:"century", color:"#2196F3"},
+                {id:2, title:"Промышленная революция", start:"1760-01-01", end:"1840-01-01", type:"range", importance:"century", color:"#2196F3"},
+                {id:3, title:"Великая французская революция", start:"1789-05-05", end:"1799-11-09", type:"range", importance:"century", color:"#2196F3"},
+                {id:4, title:"Наполеоновские войны", start:"1803-05-18", end:"1815-11-20", type:"range", importance:"century", color:"#2196F3"},
+                {id:5, title:"Отмена крепостного права в России", date:"1861-02-19", type:"single", importance:"decade", color:"#009688"},
+                {id:6, title:"Первая мировая война", start:"1914-07-28", end:"1918-11-11", type:"range", importance:"century", color:"#2196F3"},
+                {id:7, title:"Октябрьская революция", date:"1917-11-07", type:"single", importance:"decade", color:"#009688"},
+                {id:8, title:"Вторая мировая война", start:"1939-09-01", end:"1945-09-02", type:"range", importance:"century", color:"#2196F3"},
+                {id:9, title:"Первый полет человека в космос", date:"1961-04-12", type:"single", importance:"decade", color:"#009688"},
+                {id:10, title:"Распад СССР", date:"1991-12-26", type:"single", importance:"decade", color:"#009688"},
+
+                // Научные открытия
+                {id:11, title:"Открытие электричества", date:"1752-06-15", type:"single", importance:"decade", color:"#4CAF50"},
+                {id:12, title:"Первый паровоз", date:"1804-02-21", type:"single", importance:"decade", color:"#4CAF50"},
+                {id:13, title:"Теория эволюции Дарвина", date:"1859-11-24", type:"single", importance:"decade", color:"#4CAF50"},
+                {id:14, title:"Открытие пенициллина", date:"1928-09-28", type:"single", importance:"year", color:"#4CAF50"},
+                {id:15, title:"Открытие структуры ДНК", date:"1953-02-28", type:"single", importance:"decade", color:"#4CAF50"},
+                {id:16, title:"Первый человек на Луне", date:"1969-07-20", type:"single", importance:"decade", color:"#4CAF50"},
+                {id:17, title:"Создание интернета", date:"1983-01-01", type:"single", importance:"decade", color:"#4CAF50"},
+
+                // Культурные события
+                {id:18, title:"Рождение Моцарта", date:"1756-01-27", type:"single", importance:"year", color:"#9C27B0"},
+                {id:19, title:"Рождение Пушкина", date:"1799-06-06", type:"single", importance:"year", color:"#9C27B0"},
+                {id:20, title:"Публикация 'Войны и мира'", date:"1869-01-01", type:"single", importance:"year", color:"#9C27B0"},
+                {id:21, title:"Первый фильм братьев Люмьер", date:"1895-12-28", type:"single", importance:"decade", color:"#9C27B0"},
+                {id:22, title:"Первое радио", date:"1895-05-07", type:"single", importance:"decade", color:"#9C27B0"},
+
+                // Современные события
+                {id:23, title:"Создание Facebook", date:"2004-02-04", type:"single", importance:"year", color:"#FF9800"},
+                {id:24, title:"Первый iPhone", date:"2007-06-29", type:"single", importance:"year", color:"#FF9800"},
+                {id:25, title:"Пандемия COVID-19", start:"2019-12-01", end:"2022-03-11", type:"range", importance:"year", color:"#F44336"},
+                {id:26, title:"ИИ ChatGPT", date:"2022-11-30", type:"single", importance:"year", color:"#FF9800"},
+
+                // Будущие события
+                {id:27, title:"Прогноз: ИИ превосходит человека", date:"2045-01-01", type:"single", importance:"year", color:"#607D8B"},
+                {id:28, title:"Прогноз: Колония на Марсе", date:"2050-01-01", type:"single", importance:"year", color:"#607D8B"},
+
+                // Персональные события (пример)
+                {id:29, title:"Моя свадьба", date:"2015-06-20", type:"single", importance:"month", color:"#E91E63"},
+                {id:30, title:"Рождение ребенка", date:"2018-03-15", type:"single", importance:"month", color:"#E91E63"}
             ]
         };
 
@@ -141,95 +216,328 @@
                 this.lastActivity = Date.now();
                 this.events = eventsData.events;
                 this.importanceLevels = {century:1, decade:2, year:3, month:4, day:5};
+                this.currentDetailLevel = 1;
+                this.isDragging = false;
+                this.startX = 0;
+                this.startOffset = 0;
+                this.touchStartScale = 1;
+                
+                this.timelineContainer = document.getElementById('timelineContainer');
+                this.timelineLine = document.getElementById('timelineLine');
                 
                 this.init();
             }
 
             init() {
-                this.createTimelineElements();
+                this.createGraduations();
+                this.placeEvents();
                 this.setupEventHandlers();
                 this.animationLoop();
             }
 
-            createTimelineElements() {
-                this.createGraduations();
-                this.placeEvents();
-            }
-
             createGraduations() {
-                const levels = [
-                    {type:'century', step:100, height:40},
-                    {type:'halfCentury', step:50, height:30},
-                    {type:'decade', step:10, height:25},
-                    {type:'year', step:1, height:15},
-                    {type:'quarter', step:0.25, height:10},
-                    {type:'month', step:1/12, height:8},
-                    {type:'day', step:1/365, height:5}
-                ];
-
-                levels.forEach(level => {
-                    for(let y=this.minYear; y<=this.maxYear; y+=level.step){
-                        this.createMark(y, level.height, this.getLabel(y, level.type), level.type);
-                    }
-                });
+                // Очищаем старые градации
+                document.querySelectorAll('.graduation').forEach(el => el.remove());
+                
+                // Создаем градации в зависимости от уровня детализации
+                if(this.currentDetailLevel >= this.importanceLevels.century) {
+                    this.createPeriodMarks(100, 40, 'century');
+                    this.createPeriodMarks(50, 30, 'half-century');
+                }
+                
+                if(this.currentDetailLevel >= this.importanceLevels.decade) {
+                    this.createPeriodMarks(10, 25, 'decade');
+                }
+                
+                if(this.currentDetailLevel >= this.importanceLevels.year) {
+                    this.createPeriodMarks(1, 15, 'year');
+                }
+                
+                if(this.currentDetailLevel >= this.importanceLevels.month) {
+                    this.createMonthMarks();
+                }
             }
 
-            createMark(year, height, label, type) {
-                // Реализация создания меток
+            createPeriodMarks(step, height, type) {
+                for(let year = this.minYear; year <= this.maxYear; year += step) {
+                    const date = new Date(year, 0, 1);
+                    const position = this.calculatePosition(date);
+                    
+                    const graduation = document.createElement('div');
+                    graduation.className = `graduation ${type}`;
+                    graduation.style.left = `${position}%`;
+                    
+                    const label = document.createElement('div');
+                    label.className = 'graduation-label';
+                    label.textContent = year;
+                    
+                    const line = document.createElement('div');
+                    line.className = 'graduation-line';
+                    line.style.height = `${height}px`;
+                    
+                    graduation.appendChild(label);
+                    graduation.appendChild(line);
+                    this.timelineLine.appendChild(graduation);
+                }
+            }
+
+            createMonthMarks() {
+                // Реализация месячных отметок
+            }
+
+            calculatePosition(date) {
+                if(typeof date === 'string') date = new Date(date);
+                const totalYears = this.maxYear - this.minYear;
+                const yearsPassed = date.getFullYear() - this.minYear;
+                const monthsPassed = date.getMonth();
+                const daysPassed = date.getDate();
+                
+                return ((yearsPassed + monthsPassed/12 + daysPassed/365) / totalYears * 100);
             }
 
             placeEvents() {
                 this.events.forEach(event => {
-                    const pos = this.calculatePosition(event.start || event.date);
-                    this.createEventMarker(event, pos);
+                    if(event.type === 'range') {
+                        this.createRangeEvent(event);
+                    } else {
+                        this.createSingleEvent(event);
+                    }
                 });
             }
 
-            createEventMarker(event, position) {
-                // Реализация создания маркеров событий
+            createRangeEvent(event) {
+                const startPos = this.calculatePosition(event.start);
+                const endPos = this.calculatePosition(event.end);
+                
+                // Создаем диапазон
+                const range = document.createElement('div');
+                range.className = 'event-range';
+                range.style.left = `${startPos}%`;
+                range.style.width = `${endPos - startPos}%`;
+                range.style.top = '50%';
+                range.style.backgroundColor = event.color;
+                range.dataset.id = event.id;
+                
+                // Создаем маркеры начала и конца
+                const startMarker = document.createElement('div');
+                startMarker.className = 'event-marker';
+                startMarker.style.left = `${startPos}%`;
+                
+                const startBall = document.createElement('div');
+                startBall.className = 'event-ball';
+                startBall.style.backgroundColor = event.color;
+                
+                const startInfo = document.createElement('div');
+                startInfo.className = 'event-info';
+                startInfo.textContent = `${event.title}\nНачало: ${event.start}`;
+                
+                startMarker.appendChild(startBall);
+                startMarker.appendChild(startInfo);
+                
+                const endMarker = document.createElement('div');
+                endMarker.className = 'event-marker';
+                endMarker.style.left = `${endPos}%`;
+                
+                const endBall = document.createElement('div');
+                endBall.className = 'event-ball';
+                endBall.style.backgroundColor = '#000080';
+                
+                const endInfo = document.createElement('div');
+                endInfo.className = 'event-info';
+                endInfo.textContent = `${event.title}\nКонец: ${event.end}`;
+                
+                endMarker.appendChild(endBall);
+                endMarker.appendChild(endInfo);
+                
+                this.timelineLine.appendChild(range);
+                this.timelineLine.appendChild(startMarker);
+                this.timelineLine.appendChild(endMarker);
+            }
+
+            createSingleEvent(event) {
+                const pos = this.calculatePosition(event.date);
+                
+                const marker = document.createElement('div');
+                marker.className = 'event-marker';
+                marker.style.left = `${pos}%`;
+                marker.dataset.id = event.id;
+                
+                const shape = document.createElement('div');
+                shape.className = event.type === 'single' ? 'event-diamond' : 'event-ball';
+                shape.style.backgroundColor = event.color;
+                
+                const info = document.createElement('div');
+                info.className = 'event-info';
+                info.textContent = `${event.title}\nДата: ${event.date}`;
+                
+                marker.appendChild(shape);
+                marker.appendChild(info);
+                this.timelineLine.appendChild(marker);
             }
 
             setupEventHandlers() {
-                // Обработчики мыши и тач-событий
                 window.addEventListener('wheel', this.handleWheel.bind(this));
+                window.addEventListener('mousedown', this.handleMouseDown.bind(this));
                 window.addEventListener('mousemove', this.handleMouseMove.bind(this));
-                window.addEventListener('touchstart', this.handleTouchStart.bind(this));
-                window.addEventListener('touchmove', this.handleTouchMove.bind(this));
+                window.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                window.addEventListener('touchstart', this.handleTouchStart.bind(this), {passive: false});
+                window.addEventListener('touchmove', this.handleTouchMove.bind(this), {passive: false});
+                window.addEventListener('touchend', this.handleTouchEnd.bind(this));
             }
 
             handleWheel(e) {
-                // Логика масштабирования
+                e.preventDefault();
+                
+                // Масштабирование относительно позиции курсора
+                const rect = this.timelineLine.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const zoomPoint = (mouseX / rect.width) * 100;
+                
+                const delta = e.deltaY * -0.001;
+                const newScale = Math.min(Math.max(0.5, this.scale + delta), 50);
+                
+                // Корректировка offset для масштабирования относительно курсора
+                this.offset += (zoomPoint - 50) * (newScale - this.scale);
+                this.scale = newScale;
+                
+                this.updateDetailLevel();
+                this.lastActivity = Date.now();
+                this.updateTransform();
+            }
+
+            handleMouseDown(e) {
+                this.isDragging = true;
+                this.startX = e.clientX;
+                this.startOffset = this.offset;
             }
 
             handleMouseMove(e) {
-                // Логика наклона
+                // Наклон шкалы
+                const centerX = window.innerWidth / 2;
+                this.tilt = (e.clientX - centerX) / centerX * 15;
+                
+                // Перетаскивание
+                if(this.isDragging) {
+                    this.offset = this.startOffset + (e.clientX - this.startX) * 0.5;
+                    this.lastActivity = Date.now();
+                }
+                
+                this.updateTransform();
+            }
+
+            handleMouseUp() {
+                this.isDragging = false;
             }
 
             handleTouchStart(e) {
-                // Начало касания
+                if(e.touches.length === 1) {
+                    this.isDragging = true;
+                    this.startX = e.touches[0].clientX;
+                    this.startOffset = this.offset;
+                } else if(e.touches.length === 2) {
+                    this.touchStartScale = this.scale;
+                }
             }
 
             handleTouchMove(e) {
-                // Обработка перемещения пальцев
+                e.preventDefault();
+                
+                if(e.touches.length === 1 && this.isDragging) {
+                    this.offset = this.startOffset + (e.touches[0].clientX - this.startX) * 0.5;
+                    this.lastActivity = Date.now();
+                    this.updateTransform();
+                } else if(e.touches.length === 2) {
+                    // Масштабирование двумя пальцами
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    this.scale = Math.min(Math.max(0.5, this.touchStartScale * (dist / 100)), 50);
+                    this.updateDetailLevel();
+                    this.lastActivity = Date.now();
+                    this.updateTransform();
+                }
             }
 
-            updateTransforms() {
-                // Обновление всех преобразований
+            handleTouchEnd() {
+                this.isDragging = false;
+            }
+
+            updateDetailLevel() {
+                if(this.scale < 2) {
+                    this.currentDetailLevel = 1; // Столетия
+                } else if(this.scale < 5) {
+                    this.currentDetailLevel = 2; // Десятилетия
+                } else if(this.scale < 10) {
+                    this.currentDetailLevel = 3; // Годы
+                } else if(this.scale < 20) {
+                    this.currentDetailLevel = 4; // Месяцы
+                } else {
+                    this.currentDetailLevel = 5; // Дни
+                }
+                
+                this.createGraduations();
+            }
+
+            updateTransform() {
+                // Ширина шкалы зависит от масштаба
+                const width = 200 * this.scale;
+                this.timelineLine.style.width = `${width}vw`;
+                
+                // Позиционирование и трансформация
+                this.timelineContainer.style.transform = `
+                    translate(${-50 + this.offset/20}%, -50%)
+                    scale(${this.scale})
+                    rotateZ(${this.tilt}deg)
+                    rotateX(15deg)
+                `;
             }
 
             animationLoop() {
-                // Основной цикл анимации
                 requestAnimationFrame(() => this.animationLoop());
+                
+                // Автоматический возврат к исходному состоянию
+                if(Date.now() - this.lastActivity > 5000) {
+                    if(this.scale > 1) {
+                        this.scale *= 0.98;
+                        this.offset *= 0.98;
+                        this.tilt *= 0.98;
+                        
+                        if(Math.abs(this.offset) < 0.1) this.offset = 0;
+                        if(Math.abs(this.tilt) < 0.1) this.tilt = 0;
+                        
+                        this.updateDetailLevel();
+                        this.updateTransform();
+                    }
+                }
+                
                 this.updateVisibility();
-                this.autoReset();
             }
 
             updateVisibility() {
-                // Обновление видимости элементов
-            }
-
-            autoReset() {
-                // Автоматический сброс через 5 сек
+                // Обновляем видимость событий в зависимости от важности
+                this.events.forEach(event => {
+                    const elements = document.querySelectorAll(`[data-id="${event.id}"]`);
+                    const requiredLevel = this.importanceLevels[event.importance];
+                    
+                    elements.forEach(el => {
+                        el.style.opacity = this.currentDetailLevel >= requiredLevel ? 1 : 0;
+                        el.style.transform = `scale(${Math.min(this.scale/3, 1)})`;
+                    });
+                });
+                
+                // Обновляем видимость градаций
+                document.querySelectorAll('.graduation').forEach(graduation => {
+                    const type = graduation.classList[1];
+                    let opacity = 0;
+                    
+                    if(type === 'century' && this.currentDetailLevel >= 1) opacity = 1;
+                    else if(type === 'half-century' && this.currentDetailLevel >= 1) opacity = 0.8;
+                    else if(type === 'decade' && this.currentDetailLevel >= 2) opacity = 0.6;
+                    else if(type === 'year' && this.currentDetailLevel >= 3) opacity = 0.4;
+                    
+                    graduation.style.opacity = opacity;
+                });
             }
         }
 
