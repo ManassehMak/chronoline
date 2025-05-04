@@ -14,6 +14,7 @@
             background: #000;
             font-family: 'Arial', sans-serif;
             touch-action: none;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="white" d="M7 19h10v1H7zm0-4h10v1H7zm0-4h10v1H7zm0-4h10v1H7zm0-4h10v1H7z"/></svg>'), auto;
         }
 
         .container {
@@ -51,14 +52,14 @@
             background: linear-gradient(
                 to right,
                 transparent 0%,
-                #FFF3E0 20%,
-                #FFF3E0 80%,
+                #FFF3E0 5%,
+                #FFF3E0 95%,
                 transparent 100%
             );
             box-shadow: 0 0 30px rgba(255, 243, 224, 0.4);
             position: relative;
             border-radius: 5px;
-            transform: rotateX(15deg);
+            transform: rotateX(7deg);
             width: 200vw;
         }
 
@@ -68,9 +69,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
             bottom: 0;
+            opacity: 0;
+        }
+
+        .graduation.visible {
+            opacity: 1;
         }
 
         .graduation-label {
@@ -83,21 +89,27 @@
             margin-bottom: 5px;
             font-weight: bold;
             transform: translateZ(10px);
+            transition: all 0.3s ease;
         }
 
         .graduation-line {
             width: 2px;
             background: #000080;
-            transition: height 0.3s ease;
+            transition: height 0.5s ease;
         }
 
         .event-marker {
             position: absolute;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             transform-style: preserve-3d;
             z-index: 2;
             transform-origin: center;
+            opacity: 0;
+        }
+
+        .event-marker.visible {
+            opacity: 1;
         }
 
         .event-ball {
@@ -147,7 +159,20 @@
             background: rgba(33, 150, 243, 0.3);
             border-radius: 5px;
             transform: translateY(-50%);
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .event-range.visible {
+            opacity: 1;
+        }
+
+        .grab-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="white" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>'), grab;
+        }
+
+        .grabbing-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="white" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>'), grabbing;
         }
     </style>
 </head>
@@ -162,7 +187,6 @@
     <script>
         const eventsData = {
             events: [
-                // Важные исторические события
                 {id:1, title:"Война за испанское наследство", start:"1701-07-09", end:"1714-09-07", type:"range", importance:"century", color:"#2196F3"},
                 {id:2, title:"Промышленная революция", start:"1760-01-01", end:"1840-01-01", type:"range", importance:"century", color:"#2196F3"},
                 {id:3, title:"Великая французская революция", start:"1789-05-05", end:"1799-11-09", type:"range", importance:"century", color:"#2196F3"},
@@ -173,8 +197,6 @@
                 {id:8, title:"Вторая мировая война", start:"1939-09-01", end:"1945-09-02", type:"range", importance:"century", color:"#2196F3"},
                 {id:9, title:"Первый полет человека в космос", date:"1961-04-12", type:"single", importance:"decade", color:"#009688"},
                 {id:10, title:"Распад СССР", date:"1991-12-26", type:"single", importance:"decade", color:"#009688"},
-
-                // Научные открытия
                 {id:11, title:"Открытие электричества", date:"1752-06-15", type:"single", importance:"decade", color:"#4CAF50"},
                 {id:12, title:"Первый паровоз", date:"1804-02-21", type:"single", importance:"decade", color:"#4CAF50"},
                 {id:13, title:"Теория эволюции Дарвина", date:"1859-11-24", type:"single", importance:"decade", color:"#4CAF50"},
@@ -182,25 +204,17 @@
                 {id:15, title:"Открытие структуры ДНК", date:"1953-02-28", type:"single", importance:"decade", color:"#4CAF50"},
                 {id:16, title:"Первый человек на Луне", date:"1969-07-20", type:"single", importance:"decade", color:"#4CAF50"},
                 {id:17, title:"Создание интернета", date:"1983-01-01", type:"single", importance:"decade", color:"#4CAF50"},
-
-                // Культурные события
                 {id:18, title:"Рождение Моцарта", date:"1756-01-27", type:"single", importance:"year", color:"#9C27B0"},
                 {id:19, title:"Рождение Пушкина", date:"1799-06-06", type:"single", importance:"year", color:"#9C27B0"},
                 {id:20, title:"Публикация 'Войны и мира'", date:"1869-01-01", type:"single", importance:"year", color:"#9C27B0"},
                 {id:21, title:"Первый фильм братьев Люмьер", date:"1895-12-28", type:"single", importance:"decade", color:"#9C27B0"},
                 {id:22, title:"Первое радио", date:"1895-05-07", type:"single", importance:"decade", color:"#9C27B0"},
-
-                // Современные события
                 {id:23, title:"Создание Facebook", date:"2004-02-04", type:"single", importance:"year", color:"#FF9800"},
                 {id:24, title:"Первый iPhone", date:"2007-06-29", type:"single", importance:"year", color:"#FF9800"},
                 {id:25, title:"Пандемия COVID-19", start:"2019-12-01", end:"2022-03-11", type:"range", importance:"year", color:"#F44336"},
                 {id:26, title:"ИИ ChatGPT", date:"2022-11-30", type:"single", importance:"year", color:"#FF9800"},
-
-                // Будущие события
                 {id:27, title:"Прогноз: ИИ превосходит человека", date:"2045-01-01", type:"single", importance:"year", color:"#607D8B"},
                 {id:28, title:"Прогноз: Колония на Марсе", date:"2050-01-01", type:"single", importance:"year", color:"#607D8B"},
-
-                // Персональные события (пример)
                 {id:29, title:"Моя свадьба", date:"2015-06-20", type:"single", importance:"month", color:"#E91E63"},
                 {id:30, title:"Рождение ребенка", date:"2018-03-15", type:"single", importance:"month", color:"#E91E63"}
             ]
@@ -221,6 +235,7 @@
                 this.startX = 0;
                 this.startOffset = 0;
                 this.touchStartScale = 1;
+                this.lastScale = 1;
                 
                 this.timelineContainer = document.getElementById('timelineContainer');
                 this.timelineLine = document.getElementById('timelineLine');
@@ -236,8 +251,8 @@
             }
 
             createGraduations() {
-                // Очищаем старые градации
-                document.querySelectorAll('.graduation').forEach(el => el.remove());
+                // Очищаем только старые градации того же типа
+                document.querySelectorAll('.graduation:not(.persistent)').forEach(el => el.remove());
                 
                 // Создаем градации в зависимости от уровня детализации
                 if(this.currentDetailLevel >= this.importanceLevels.century) {
@@ -253,36 +268,48 @@
                     this.createPeriodMarks(1, 15, 'year');
                 }
                 
-                if(this.currentDetailLevel >= this.importanceLevels.month) {
-                    this.createMonthMarks();
-                }
+                this.updateGraduationVisibility();
             }
 
             createPeriodMarks(step, height, type) {
                 for(let year = this.minYear; year <= this.maxYear; year += step) {
-                    const date = new Date(year, 0, 1);
-                    const position = this.calculatePosition(date);
-                    
-                    const graduation = document.createElement('div');
-                    graduation.className = `graduation ${type}`;
-                    graduation.style.left = `${position}%`;
-                    
-                    const label = document.createElement('div');
-                    label.className = 'graduation-label';
-                    label.textContent = year;
-                    
-                    const line = document.createElement('div');
-                    line.className = 'graduation-line';
-                    line.style.height = `${height}px`;
-                    
-                    graduation.appendChild(label);
-                    graduation.appendChild(line);
-                    this.timelineLine.appendChild(graduation);
+                    const existing = document.querySelector(`.graduation.${type}[data-year="${year}"]`);
+                    if(!existing) {
+                        const date = new Date(year, 0, 1);
+                        const position = this.calculatePosition(date);
+                        
+                        const graduation = document.createElement('div');
+                        graduation.className = `graduation ${type}`;
+                        graduation.dataset.year = year;
+                        graduation.style.left = `${position}%`;
+                        
+                        const label = document.createElement('div');
+                        label.className = 'graduation-label';
+                        label.textContent = year;
+                        
+                        const line = document.createElement('div');
+                        line.className = 'graduation-line';
+                        line.style.height = `${height}px`;
+                        
+                        graduation.appendChild(label);
+                        graduation.appendChild(line);
+                        this.timelineLine.appendChild(graduation);
+                    }
                 }
             }
 
-            createMonthMarks() {
-                // Реализация месячных отметок
+            updateGraduationVisibility() {
+                document.querySelectorAll('.graduation').forEach(graduation => {
+                    const type = graduation.classList[1];
+                    let shouldBeVisible = false;
+                    
+                    if(type === 'century' && this.currentDetailLevel >= 1) shouldBeVisible = true;
+                    else if(type === 'half-century' && this.currentDetailLevel >= 1) shouldBeVisible = true;
+                    else if(type === 'decade' && this.currentDetailLevel >= 2) shouldBeVisible = true;
+                    else if(type === 'year' && this.currentDetailLevel >= 3) shouldBeVisible = true;
+                    
+                    graduation.classList.toggle('visible', shouldBeVisible);
+                });
             }
 
             calculatePosition(date) {
@@ -322,6 +349,7 @@
                 const startMarker = document.createElement('div');
                 startMarker.className = 'event-marker';
                 startMarker.style.left = `${startPos}%`;
+                startMarker.dataset.id = event.id;
                 
                 const startBall = document.createElement('div');
                 startBall.className = 'event-ball';
@@ -337,6 +365,7 @@
                 const endMarker = document.createElement('div');
                 endMarker.className = 'event-marker';
                 endMarker.style.left = `${endPos}%`;
+                endMarker.dataset.id = event.id;
                 
                 const endBall = document.createElement('div');
                 endBall.className = 'event-ball';
@@ -409,12 +438,15 @@
                 this.isDragging = true;
                 this.startX = e.clientX;
                 this.startOffset = this.offset;
+                document.body.classList.add('grabbing-cursor');
+                document.body.classList.remove('grab-cursor');
+                e.preventDefault();
             }
 
             handleMouseMove(e) {
                 // Наклон шкалы
                 const centerX = window.innerWidth / 2;
-                this.tilt = (e.clientX - centerX) / centerX * 15;
+                this.tilt = (e.clientX - centerX) / centerX * 7;
                 
                 // Перетаскивание
                 if(this.isDragging) {
@@ -427,6 +459,8 @@
 
             handleMouseUp() {
                 this.isDragging = false;
+                document.body.classList.add('grab-cursor');
+                document.body.classList.remove('grabbing-cursor');
             }
 
             handleTouchStart(e) {
@@ -464,33 +498,44 @@
             }
 
             updateDetailLevel() {
-                if(this.scale < 2) {
-                    this.currentDetailLevel = 1; // Столетия
-                } else if(this.scale < 5) {
-                    this.currentDetailLevel = 2; // Десятилетия
-                } else if(this.scale < 10) {
-                    this.currentDetailLevel = 3; // Годы
-                } else if(this.scale < 20) {
-                    this.currentDetailLevel = 4; // Месяцы
-                } else {
-                    this.currentDetailLevel = 5; // Дни
-                }
+                const newLevel = 
+                    this.scale < 1.5 ? 1 : 
+                    this.scale < 3 ? 2 : 
+                    this.scale < 6 ? 3 : 
+                    this.scale < 12 ? 4 : 5;
                 
-                this.createGraduations();
+                if(newLevel !== this.currentDetailLevel) {
+                    this.currentDetailLevel = newLevel;
+                    this.createGraduations();
+                    this.updateEventVisibility();
+                }
             }
 
             updateTransform() {
-                // Ширина шкалы зависит от масштаба
-                const width = 200 * this.scale;
+                // Плавное масштабирование с инерцией
+                const width = 200 * Math.min(this.scale, 2); // Ограничиваем максимальное расширение
                 this.timelineLine.style.width = `${width}vw`;
                 
-                // Позиционирование и трансформация
+                // Плавное позиционирование
                 this.timelineContainer.style.transform = `
                     translate(${-50 + this.offset/20}%, -50%)
                     scale(${this.scale})
                     rotateZ(${this.tilt}deg)
-                    rotateX(15deg)
+                    rotateX(7deg)
                 `;
+            }
+
+            updateEventVisibility() {
+                this.events.forEach(event => {
+                    const elements = document.querySelectorAll(`[data-id="${event.id}"]`);
+                    const requiredLevel = this.importanceLevels[event.importance];
+                    const isVisible = this.currentDetailLevel >= requiredLevel;
+                    
+                    elements.forEach(el => {
+                        el.classList.toggle('visible', isVisible);
+                        el.style.transform = `scale(${Math.min(this.scale/2, 1)})`;
+                    });
+                });
             }
 
             animationLoop() {
@@ -510,39 +555,14 @@
                         this.updateTransform();
                     }
                 }
-                
-                this.updateVisibility();
-            }
-
-            updateVisibility() {
-                // Обновляем видимость событий в зависимости от важности
-                this.events.forEach(event => {
-                    const elements = document.querySelectorAll(`[data-id="${event.id}"]`);
-                    const requiredLevel = this.importanceLevels[event.importance];
-                    
-                    elements.forEach(el => {
-                        el.style.opacity = this.currentDetailLevel >= requiredLevel ? 1 : 0;
-                        el.style.transform = `scale(${Math.min(this.scale/3, 1)})`;
-                    });
-                });
-                
-                // Обновляем видимость градаций
-                document.querySelectorAll('.graduation').forEach(graduation => {
-                    const type = graduation.classList[1];
-                    let opacity = 0;
-                    
-                    if(type === 'century' && this.currentDetailLevel >= 1) opacity = 1;
-                    else if(type === 'half-century' && this.currentDetailLevel >= 1) opacity = 0.8;
-                    else if(type === 'decade' && this.currentDetailLevel >= 2) opacity = 0.6;
-                    else if(type === 'year' && this.currentDetailLevel >= 3) opacity = 0.4;
-                    
-                    graduation.style.opacity = opacity;
-                });
             }
         }
 
         // Инициализация при загрузке
-        window.addEventListener('load', () => new Chronoline());
+        window.addEventListener('load', () => {
+            document.body.classList.add('grab-cursor');
+            new Chronoline();
+        });
     </script>
 </body>
 </html>
